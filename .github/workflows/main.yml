@@ -19,12 +19,12 @@ jobs:
         
     - name: Restore dependencies
       run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore
-      
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+
+    - name: Tag
+      if: startsWith(github.ref, 'refs/heads/release/')
+      run: |
+        git tag "v$env:GitVersion_SemVer"
+        git push origin "v$env:GitVersion_SemVer"
 
     - name: Publish
       run: dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
@@ -45,5 +45,15 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: "App*"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Release
+      if: startsWith(github.ref, 'refs/heads/release/')
+      uses: softprops/action-gh-release@v1
+      with:
+        name: v${{ env.GitVersion_SemVer }}
+        prerelease: ${{ env.GitVersion_PreReleaseLabel != '' }}
+        files: ./artifacts/sidekick-*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
