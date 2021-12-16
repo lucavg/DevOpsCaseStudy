@@ -144,7 +144,6 @@ namespace DevOpsCaseStudy
                                     string urlPath = jobPath + i + "]";
                                     obj.setUrl(driver.FindElement(By.XPath(urlPath)).GetAttribute("href"));
 
-                                    Console.WriteLine(obj.ToString());
                                     writer.WriteLine(obj.ToString());
                                 }
                             }
