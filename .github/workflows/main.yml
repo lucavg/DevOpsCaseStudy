@@ -1,16 +1,17 @@
-name: build CI CD
+name: Build And Artifact
 on: [push, pull_request, workflow_dispatch]
 env:
-  DOTNET_VERSION: '5.0.301'
+  DOTNET_VERSION: '5.0.301' # The .NET SDK version to use
 
 jobs:
   build-and-test:
+
     name: build-and-test-${{matrix.os}}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows.latest]
-    
+        os: [windows-latest]
+
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
