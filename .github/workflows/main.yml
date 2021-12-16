@@ -40,3 +40,10 @@ jobs:
         7z a -tzip "${release_name}.zip" "./${release_name}/*"
         
         rm -r "$release_name"
+    
+    - name: Publish Result
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "App*"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
