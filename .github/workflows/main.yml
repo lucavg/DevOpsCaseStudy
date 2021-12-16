@@ -32,10 +32,10 @@ jobs:
     - name: Upload DevOpsCaseStudy Artifact
       shell: bash
       run: |
-        tag=$(git describe --tags --abbrev=0)
+        tag=$(git describe --tags --always)
         release_name="App-$tag-${{ matrix.target }}"
         
-        dotnet publish DevOpsCaseStudy/DevOpsCaseStudy.csproj --framework netcoreapp6.0 --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+        dotnet publish DevOpsCaseStudy/DevOpsCaseStudy.csproj --framework net6.0 --runtime "${{ matrix.target }}" -c Release -o "$release_name"
         
         7z a -tzip "${release_name}.zip" "./${release_name}/*"
         
