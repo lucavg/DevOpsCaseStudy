@@ -28,3 +28,9 @@ jobs:
 
     - name: Publish
       run: dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
+
+    - name: Upload DevOpsCaseStudy Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: DevOpsCaseStudyLVG
+        path: /DevOpsCaseStudy/bin/Debug/netcoreapp6.0/publish
