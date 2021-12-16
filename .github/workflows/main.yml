@@ -21,11 +21,8 @@ jobs:
       run: dotnet restore
 
     - name: Tag
-      if: startsWith(github.ref, 'refs/heads/release/')
-      run: |
-        git tag "v$env:GitVersion_SemVer"
-        git push origin "v$env:GitVersion_SemVer"
-
+      uses: EndBug/latest-tag@v1.4.0
+      
     - name: Publish
       run: dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
 
