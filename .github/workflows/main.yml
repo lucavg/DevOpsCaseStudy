@@ -30,7 +30,13 @@ jobs:
       run: dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
 
     - name: Upload DevOpsCaseStudy Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: DevOpsCaseStudyLVG
-        path: /DevOpsCaseStudy/bin/Debug/netcoreapp6.0/publish
+      shell: bash
+      run: |
+        tag=$(git describe --tags --abbrev=0)
+        release_name="App-$tag-${{ matrix.target }}"
+        
+        dotnet publish DevOpsCaseStudy/DevOpsCaseStudy.csproj --framework netcoreapp6.0 --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+        
+        7z a -tzip "${release_name}.zip" "./${release_name}/*"
+        
+        rm -r "$release_name"
