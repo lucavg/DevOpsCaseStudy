@@ -104,17 +104,11 @@ namespace DevOpsCaseStudy
                             input.Click();
                             input.SendKeys(indSearchTerm);
 
-                            Thread.Sleep(500);
-
                             var indSortByDate = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[2]/div[3]/div/div[3]/select/option[2]"));
                             indSortByDate.Click();
 
-                            Thread.Sleep(500);
-
                             var indPeriod = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[2]/div[2]/div[2]/select"));
                             indPeriod.Click();
-
-                            Thread.Sleep(500);
 
                             input.Submit();
 
