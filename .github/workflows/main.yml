@@ -22,24 +22,13 @@ jobs:
 
     - name: Tag
       uses: EndBug/latest-tag@v1.4.0
-      
-    - name: Publish
-      run: dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true
 
-    - name: Upload DevOpsCaseStudy Artifact
-      shell: bash
+    - name: publish
       run: |
-        tag=$(git describe --tags --always)
-        release_name="App-$tag-${{ matrix.target }}"
-        
-        dotnet publish DevOpsCaseStudy/DevOpsCaseStudy.csproj --framework net6.0 --runtime "${{ matrix.target }}" -c Release -o "$release_name"
-        
-        7z a -tzip "${release_name}.zip" "./${release_name}/*"
-        
-        rm -r "$release_name"
+          dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --self-contained true
     
     - name: Upload WebApp1 Build Artifact
       uses: actions/upload-artifact@v2
       with:
         name: DevOpsCaseStudy
-        path: DevOpsCaseStudy/bin/Debug/net6.0/publish/
+        path: ./DevOpsCaseStudy/bin/Release/net6.0/win-x64/publish/**.exe
