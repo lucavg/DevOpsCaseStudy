@@ -8,28 +8,45 @@ namespace DevOpsCaseStudy
     {
         static void Main(string[] args)
         {
+            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+            service.EnableVerboseLogging = false;
+            service.SuppressInitialDiagnosticInformation = true;
+            service.HideCommandPromptWindow = true;
+
+            ChromeOptions options = new ChromeOptions();
+
+            options.PageLoadStrategy = PageLoadStrategy.Normal;
+
+            options.AddArgument("--no-sandbox");
+            options.AddArgument("--disable-crash-reporter");
+            options.AddArgument("--disable-extensions");
+            options.AddArgument("--disable-in-process-stack-traces");
+            options.AddArgument("--disable-logging");
+            options.AddArgument("--disable-dev-shm-usage");
+            options.AddArgument("--log-level=3");
+            options.AddArgument("--output=/dev/null");
+
             string decision = "0";
-            while (true)
+
+            Console.Clear();
+            Console.WriteLine("Which site would you like to search?");
+            Console.WriteLine("Youtube = 1");
+            Console.WriteLine("Indeed = 2");
+            Console.WriteLine("YgoProDeck = 3");
+            Console.WriteLine();
+            decision = Console.ReadLine();
+            switch (decision)
             {
-                Console.Clear();
-                Console.WriteLine("Which site would you like to search?");
-                Console.WriteLine("Youtube = 1");
-                Console.WriteLine("Indeed = 2");
-                Console.WriteLine("YgoProDeck = 3");
-                Console.WriteLine("Exit application = 4");
-                Console.WriteLine();
-                decision = Console.ReadLine();
-                Console.WriteLine("You chose: " + decision);
-                Thread.Sleep(1500);
-                Console.Clear();
-                if (decision == "1")
-                {
+                case "1":
+                    Console.WriteLine("You chose: Youtube");
+                    Thread.Sleep(1500);
+                    Console.Clear();
                     Console.WriteLine("Please enter a search term to scrape:");
                     string ytSearchTerm = Console.ReadLine();
                     Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                    if (ytSearchTerm != null || ytSearchTerm != "")
+                    if (string.IsNullOrWhiteSpace(ytSearchTerm) == false)
                     {
-                        using (var driver = new ChromeDriver())
+                        using (var driver = new ChromeDriver(service, options))
                         {
                             Console.WriteLine("You searched for: " + ytSearchTerm);
                             driver.Navigate().GoToUrl("https://www.youtube.com");
@@ -81,28 +98,38 @@ namespace DevOpsCaseStudy
                                     writer.WriteLine(obj.ToString());
                                 }
                             }
+                            Console.WriteLine("Scraping is done!");
                             Console.WriteLine("Results were sent to C:/DevOpsOutput/YoutubeOutput.csv!");
+                            Console.WriteLine("Press any key to exit the program.");
                             Console.ReadLine();
-                            Console.Clear();
                         }
                     }
-                }
-                else if (decision == "2")
-                {
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Please enter a valid search term.");
+                        Console.WriteLine("Program will now close");
+                        break;
+                    }
+                    break;
+                case "2":
+                    Console.WriteLine("You chose: Indeed");
+                    Thread.Sleep(1500);
+                    Console.Clear();
                     Console.WriteLine("Please enter a job advertisement to scrape:");
                     string indSearchTerm = Console.ReadLine();
                     Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                    if (indSearchTerm != null || indSearchTerm != "")
+                    if (string.IsNullOrWhiteSpace(indSearchTerm) == false)
                     {
-                        using (var driver = new ChromeDriver())
+                        using (var driver = new ChromeDriver(service, options))
                         {
                             driver.Navigate().GoToUrl("https://be.indeed.com/advanced_search?%22");
 
                             driver.Manage().Window.Maximize();
 
-                            var input = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[1]/div[1]/div[2]/input"));
-                            input.Click();
-                            input.SendKeys(indSearchTerm);
+                            var indeedSearchBar = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[1]/div[1]/div[2]/input"));
+                            indeedSearchBar.Click();
+                            indeedSearchBar.SendKeys(indSearchTerm);
 
                             var indSortByDate = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[2]/div[3]/div/div[3]/select/option[2]"));
                             indSortByDate.Click();
@@ -110,7 +137,7 @@ namespace DevOpsCaseStudy
                             var indPeriod = driver.FindElement(By.XPath("/html/body/div[2]/form/fieldset[2]/div[2]/div[2]/select"));
                             indPeriod.Click();
 
-                            input.Submit();
+                            indeedSearchBar.Submit();
 
                             Thread.Sleep(2000);
 
@@ -142,69 +169,82 @@ namespace DevOpsCaseStudy
                                 }
                             }
                         }
-                        Console.WriteLine("Results were sent to C:/DevOpsOutput/IndeedOutput.csv");
+                        Console.WriteLine("Scraping is done!");
+                        Console.WriteLine("Results were sent to C:/DevOpsOutput/IndeedOutput.csv!");
+                        Console.WriteLine("Press any key to exit the program.");
                         Console.ReadLine();
-                        Console.Clear();
                     }
-                }
-                else if (decision == "3")
-                {
-                    using (var driver = new ChromeDriver())
+                    else
                     {
-                        Actions builder = new Actions(driver);
-                        driver.Navigate().GoToUrl("https://ygoprodeck.com/deck-search");
-                        driver.Manage().Window.Maximize();
-
-                        var searchbox = driver.FindElement(By.XPath("//*[@id='DSPdeckName']"));
-                        var searchButton = driver.FindElement(By.XPath("//*[@id='DSPsearchDecks']"));
-
-                        Console.WriteLine("Enter a deck you'd like to search for:");
-                        string input = Console.ReadLine();
-                        Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-                        searchbox.Click();
-                        searchbox.SendKeys(input);
-                        searchButton.Click();
-                        Thread.Sleep(2000);
-
-                        string deckPath = "/html/body/div/div/div/div/div/div/div[";
-                        using (var writer = new StreamWriter("c:/DevOpsOutput/YugiohOutput.csv"))
-                        {
-                            for (int i = 1; i < 11; i++)
-                            {
-                                YugiohObject obj = new YugiohObject();
-                                var deckTitle = driver.FindElement(By.XPath(deckPath + i + "]/div/h2/a"));
-                                obj.setTitle(deckTitle.Text);
-
-                                var deckDescription = driver.FindElement(By.XPath(deckPath + i + "]/div/p[3]"));
-                                obj.setDescription(deckDescription.Text);
-
-                                var deckUrl = driver.FindElement(By.XPath(deckPath + i + "]/a"));
-                                obj.setUrl(deckUrl.GetDomProperty("href"));
-
-                                writer.WriteLine(obj.ToString());
-                            }
-                        }
-                        Console.WriteLine("Results were sent to C:/DevOpsOutput/YugiohOutput.csv");
-                        Console.ReadLine();
                         Console.Clear();
+                        Console.WriteLine("Please enter a valid search term.");
+                        Console.WriteLine("Program will now close");
+                        break;
                     }
-                }
-                else if (decision != "1" || decision != "2" || decision != "3" || decision != "4")
-                {
-                    Console.WriteLine("Please enter a valid option from the choices given.");
-                    Console.ReadLine();
-                    Console.Clear();
-                }
-                else if (decision == "4")
-                {
-                    Console.Clear();
-                    Console.WriteLine("Thank you for using our webscraping service!");
-                    Console.ReadLine();
                     break;
-                }
+                case "3":
+                    Console.WriteLine("You chose: YgoProDeck");
+                    Thread.Sleep(1500);
+                    Console.Clear();
+                    Console.WriteLine("Enter a deck you'd like to search for:");
+                    string yugiohSearchTerm= Console.ReadLine();
+                    Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    if (string.IsNullOrWhiteSpace(yugiohSearchTerm) == false)
+                    {
+                        using (var driver = new ChromeDriver(service, options))
+                        {
+                            Actions builder = new Actions(driver);
+                            driver.Navigate().GoToUrl("https://ygoprodeck.com/deck-search");
+                            driver.Manage().Window.Maximize();
+
+                            var searchbox = driver.FindElement(By.XPath("//*[@id='DSPdeckName']"));
+                            var searchButton = driver.FindElement(By.XPath("//*[@id='DSPsearchDecks']"));
+
+                            searchbox.Click();
+                            searchbox.SendKeys(yugiohSearchTerm);
+                            searchButton.Click();
+                            Thread.Sleep(2000);
+
+                            string deckPath = "/html/body/div/div/div/div/div/div/div[";
+                            using (var writer = new StreamWriter("c:/DevOpsOutput/YugiohOutput.csv"))
+                            {
+                                for (int i = 1; i < 11; i++)
+                                {
+                                    YugiohObject obj = new YugiohObject();
+                                    var deckTitle = driver.FindElement(By.XPath(deckPath + i + "]/div/h2/a"));
+                                    obj.setTitle(deckTitle.Text);
+
+                                    var deckDescription = driver.FindElement(By.XPath(deckPath + i + "]/div/p[3]"));
+                                    obj.setDescription(deckDescription.Text);
+
+                                    var deckUrl = driver.FindElement(By.XPath(deckPath + i + "]/a"));
+                                    obj.setUrl(deckUrl.GetDomProperty("href"));
+
+                                    writer.WriteLine(obj.ToString());
+                                }
+                            }
+                            Console.WriteLine("Scraping is done!");
+                            Console.WriteLine("Results were sent to C:/DevOpsOutput/YugiohOutput.csv!");
+                            Console.WriteLine("Press any key to exit the program.");
+                            Console.ReadLine();
+                        }
+                    } else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Please enter a valid search term.");
+                        Console.WriteLine("Program will now close");
+                        break;
+                    }
+                    break;
+
+                default:
+                    Console.Clear();
+                    Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    Console.WriteLine("Thank you for using our webscraping service!");
+                    Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                    Thread.Sleep(1500);
+                    break;
             }
-            Environment.Exit(0);
         }
     }
 }
