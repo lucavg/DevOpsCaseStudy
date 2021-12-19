@@ -17,6 +17,8 @@ namespace DevOpsCaseStudy
 
             options.PageLoadStrategy = PageLoadStrategy.Normal;
 
+            //lijst met alle mogelijke argumenten om Chromium-based browsers te launchen
+            //https://peter.sh/experiments/chromium-command-line-switches/
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-crash-reporter");
             options.AddArgument("--disable-extensions");
